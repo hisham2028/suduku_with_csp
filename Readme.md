@@ -9,6 +9,9 @@ python sudoku.py
 
 Project Structure
 Suduku-game/
-├── sudoku.py      
+
+├── sudoku.py  
+├
 ├── .gitignore
+├
 └── README.md
