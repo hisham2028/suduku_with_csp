@@ -3,9 +3,7 @@ Requirements
 Python 3.x
 No third-party libraries required (standard library only)
 
-Run
-
-bash
+Run:
 
 python sudoku.py
 
