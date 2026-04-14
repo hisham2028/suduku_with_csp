@@ -178,7 +178,7 @@ if __name__ == "__main__":
     original = generate_sudoku(diff)
     board    = copy.deepcopy(original)
     solution = get_solution(original)  
-    print(f"\n📋 Puzzle ({diff}):")
+    print(f"\n Puzzle ({diff}):")
     print_board(board, original, solution)
 
     print("Modes: (1) Manual  (2) AI Solve")
@@ -186,7 +186,7 @@ if __name__ == "__main__":
 
     if mode == "2":
         work = copy.deepcopy(board)
-        print("\n🤖 AI solving...")
+        print("\n AI solving...")
         if solve(work):
             print(" Solved!")
             print_board(work, original, solution)
