@@ -1,9 +1,7 @@
 import random
 import copy
 
-# Sudoku Core (CSP + MRV)
-
-
+# Check if placing num is valid
 def is_valid(board, row, col, num):
     for i in range(9):
         if board[row][i] == num or board[i][col] == num:
@@ -16,10 +14,12 @@ def is_valid(board, row, col, num):
     return True
 
 
+# Get possible values for a cell
 def get_domain(board, row, col):
     return [n for n in range(1, 10) if is_valid(board, row, col, n)]
 
 
+# Select cell with minimum domain (MRV)
 def select_cell(board):
     min_len, best = 10, None
     for i in range(9):
@@ -32,6 +32,7 @@ def select_cell(board):
     return best
 
 
+# Check for dead-end (forward checking)
 def forward_check(board):
     for i in range(9):
         for j in range(9):
@@ -40,6 +41,7 @@ def forward_check(board):
     return True
 
 
+# Solve using backtracking + MRV + forward checking
 def solve(board):
     cell = select_cell(board)
     if not cell:
@@ -53,11 +55,11 @@ def solve(board):
     return False
 
 
-# Sudoku Generator
-
+# Difficulty settings
 DIFFICULTY_CLUES = {"Easy": 46, "Medium": 32, "Hard": 26, "Expert": 22}
 
 
+# Fill full valid board
 def fill_board(board):
     for r in range(9):
         for c in range(9):
@@ -74,6 +76,7 @@ def fill_board(board):
     return True
 
 
+# Generate puzzle
 def generate_sudoku(difficulty="Medium"):
     board = [[0] * 9 for _ in range(9)]
     fill_board(board)
@@ -85,22 +88,14 @@ def generate_sudoku(difficulty="Medium"):
     return board
 
 
-
-# Display & Manual Play
-
-
-YELLOW = "\033[93m"   
-BLUE   = "\033[94m"   
-RED    = "\033[91m"  
-RESET  = "\033[0m"
-
-
+# Get solved board
 def get_solution(original):
     tmp = copy.deepcopy(original)
     solve(tmp)
     return tmp
 
 
+# Print board with colors
 def print_board(board, original, solution):
     print()
     for i, row in enumerate(board):
@@ -113,33 +108,22 @@ def print_board(board, original, solution):
             if val == 0:
                 line += ". "
             elif original[i][j] != 0:
-                line += f"{YELLOW}{val}{RESET} "   
+                line += f"\033[93m{val}\033[0m "
             elif val == solution[i][j]:
-                line += f"{BLUE}{val}{RESET} "    
+                line += f"\033[94m{val}\033[0m "
             else:
-                line += f"{RED}{val}{RESET} "      
+                line += f"\033[91m{val}\033[0m "
         print(line)
     print()
 
 
+# Manual play mode
 def manual_solve(board, original, solution):
-    print("\nEnter moves as: row col num  (1-indexed)")
-    print("Commands: 'hint', 'quit'\n")
-
     while True:
         print_board(board, original, solution)
 
         empty = sum(board[r][c] == 0 for r in range(9) for c in range(9))
         if empty == 0:
-            wrong = sum(
-                board[r][c] != solution[r][c]
-                for r in range(9) for c in range(9)
-                if original[r][c] == 0
-            )
-            if wrong == 0:
-                print("Congratulations — puzzle solved correctly!")
-            else:
-                print(f" Board is full but {wrong} cell(s) are wrong (shown in red).")
             break
 
         cmd = input("> ").strip().lower()
@@ -151,46 +135,33 @@ def manual_solve(board, original, solution):
             if empties:
                 r, c = random.choice(empties)
                 board[r][c] = solution[r][c]
-                print(f"💡 Hint: placed {solution[r][c]} at row {r+1}, col {c+1}")
         else:
             try:
-                parts = cmd.split()
-                r, c, num = int(parts[0]) - 1, int(parts[1]) - 1, int(parts[2])
-                if not (0 <= r < 9 and 0 <= c < 9 and 1 <= num <= 9):
-                    print("  Values must be row 1-9, col 1-9, num 1-9.")
-                elif original[r][c] != 0:
-                    print("  That's a given cell — you can't edit it.")
-                else:
-                    board[r][c] = num   
-            except (ValueError, IndexError):
-                print("  Invalid input. Use: row col num  (e.g. 3 5 7)")
+                r, c, num = map(int, cmd.split())
+                r, c = r - 1, c - 1
+                if original[r][c] == 0:
+                    board[r][c] = num
+            except:
+                pass
 
 
 # Main
-
-
 if __name__ == "__main__":
-    print("Difficulties: Easy, Medium, Hard, Expert")
     diff = input("Choose difficulty [Medium]: ").strip().capitalize() or "Medium"
     if diff not in DIFFICULTY_CLUES:
         diff = "Medium"
 
     original = generate_sudoku(diff)
-    board    = copy.deepcopy(original)
-    solution = get_solution(original)  
-    print(f"\n Puzzle ({diff}):")
+    board = copy.deepcopy(original)
+    solution = get_solution(original)
+
     print_board(board, original, solution)
 
-    print("Modes: (1) Manual  (2) AI Solve")
-    mode = input("Choose mode [1]: ").strip() or "1"
+    mode = input("Choose mode (1=Manual, 2=AI): ").strip() or "1"
 
     if mode == "2":
         work = copy.deepcopy(board)
-        print("\n AI solving...")
         if solve(work):
-            print(" Solved!")
             print_board(work, original, solution)
-        else:
-            print("❌ No solution found.")
     else:
         manual_solve(board, original, solution)
